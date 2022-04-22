@@ -1,4 +1,5 @@
 # Capita Selecta AI
+![Demo maze](images/demo_maze.png?raw=true "Demo maze in gui mode")
 
 # Robot Maze Solver
 Implement an offline and online search algo where a Mindstorms robot can find the most efficient
