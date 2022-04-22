@@ -90,5 +90,5 @@ The original assignment is given in dutch in opgave.txt in this repo.
 I just recently had some spare time and updated the code to work and 
 compile without errors or warnings on openjdk 11+
 
-Also this was written by Jeroen Avonts based on my C++ version for mindstorms.
-I just refactored + fixed some bugs on latest java this weekend so it's ready to be released again.
+The first version was written by Jeroen Avonts and was based on my C++ version for lego mindstorms.
+I just refactored + fixed some bugs in this java version so it works on modern java compilers.
