@@ -1,0 +1,170 @@
+package solve;
+
+import gui.GuiMazeInterface;
+
+import java.io.PrintStream;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Stack;
+import java.util.Vector;
+
+import lib.Direction;
+import lib.Maze;
+import lib.Pos;
+import lib.Robot;
+
+/**
+ * @author Jeroen Avonts
+ * 
+ * Date: Nov 16, 2004 Package: solve Project: AI TODO
+ */
+public class OfflineSolver extends BaseSolver {
+    /**
+     * <code>frontier</code> De frontier van staten
+     */
+    Vector frontier = new Vector();
+
+    /**
+     * <code>path</code> Het kortste pad
+     */
+    Stack path = new Stack();
+
+    /**
+     * <code>tmpout</code> De stream waarop de commando's komen wordt
+     * tijdelijk bijgehouden
+     */
+    PrintStream tmpout;
+
+    /**
+     * <code>tmpfast</code> De boolean voor de snelheid bepaling wordt
+     * tijdelijk bijgehouden
+     */
+    boolean tmpfast;
+
+    /**
+     * @param fast
+     *            True defines a delay on the moves
+     */
+    public OfflineSolver(boolean fast) {
+        super(true);
+        tmpfast = fast;
+    }
+
+    public void setOut(PrintStream out) {
+        tmpout = out;
+    }
+
+    /**
+     * @param path
+     *            Path to previous state
+     * @return F for the current state
+     */
+    public int calcF(Stack path) {
+        //F = afgelegde weg tot vorige staat + afstand vorige staat tot huidige
+        // staat + van huidige staat tot einde
+        return distanceTraveled(path)
+                + distance((Pos) path.peek(), rob.getPos()) + distanceToEnd();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see solve.BaseSolver#solveMaze(lib.Robot, gui.GuiMazeInterface)
+     */
+    public void solveMaze(Robot rob, GuiMazeInterface callback) {
+        this.rob = rob;
+        this.gui = callback;
+        HState state = new HState(rob.getPos(), rob.getDir(), path,
+                distanceToEnd());
+        frontier.add(state);
+
+        while (!found && !frontier.isEmpty()) {
+            //nemen het eerste uit de frontier
+            HState next = (HState) frontier.firstElement();
+            //we zetten onze robot op deze staat
+            rob.setPos(next.getPos(), next.getDir());
+            LinkedList actions = next.getActions();
+            frontier.remove(0);
+            path = next.getPath();
+
+            //we overlopen de acties
+            Iterator actionIt = actions.iterator();
+            while (!found && actionIt.hasNext()) {
+                turnShortTo((Direction) actionIt.next());
+
+                int light = forward(); //loop rechtdoor tot er geen weg meer is
+                if (light == Maze.cTurn) {
+                    goForward();
+                    //nieuwe staat bereikt, toevoegen en F toekennen
+                    HState newState = new HState(rob.getPos(), rob.getDir(),
+                            path, calcF(path));
+                    if (!frontier.contains(newState)) //als de staat al niet
+                        // reeds in de frontier
+                        // zit
+                        frontier.add(newState);
+                } else if (light == Maze.cEnd) {
+                    goForward();
+                    path.push(new Pos(rob.getPos()));
+                }
+                rob.setPos(next.getPos(), next.getDir());
+            }
+
+            Collections.sort(frontier);
+        }
+        if (found) {
+            writePath(state);
+        }
+    }
+
+    /**
+     * @param start
+     *            Start staat
+     */
+    private void writePath(HState start) {
+        out = tmpout; //nu willen we uitschrijven
+        fast = tmpfast; //nu willen we zien wat de robot doet
+        if (out != null) {
+            rob.setPos(start.getPos(), start.getDir()); //we vertrekken uit de
+            // startpositie
+            Iterator pathIt = path.iterator(); //we lopen over het gevonden
+            // path
+            Pos oldpos = (Pos) pathIt.next();
+            while (pathIt.hasNext()) {
+                Pos newpos = (Pos) pathIt.next();
+                if (oldpos.getX() == newpos.getX()) { //x hetzelfde gebleven?
+                    if (oldpos.getY() > newpos.getY()) //maar y is verkleint
+                        turnShortTo(new Direction(Direction.north)); //Draaien
+                    // naar het
+                    // noorden
+                    if (oldpos.getY() < newpos.getY()) //maar y is vergroot?
+                        turnShortTo(new Direction(Direction.south)); //Draaien
+                    // naar het
+                    // zuiden
+                } else if (oldpos.getY() == newpos.getY()) { //y hetzelfde
+                    // gebleven
+                    if (oldpos.getX() > newpos.getX()) //maar x is verkleint
+                        turnShortTo(new Direction(Direction.west)); //Draaien
+                    // naar het
+                    // westen
+                    if (oldpos.getX() < newpos.getX()) //maar x is vergroot
+                        turnShortTo(new Direction(Direction.east)); //Draaien
+                    // naar het
+                    // oosten
+                }
+                driveForwardTo(newpos); //we staan in de goede richting, dus
+                // rijden maar!
+                oldpos = newpos;
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see solve.SolverInterface#fileExtension()
+     */
+    public String fileExtension() {
+        return "OFF";
+    }
+}

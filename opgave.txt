@@ -1,0 +1,115 @@
+
+
+			ROBOT MAZE SOLVER
+			=================
+
+De opgave bestaat erin een offline en online zoekalgoritmes te
+implementeren waarmee een Mindstorms robot op zo'n efficient mogelijke
+manier het pad kan vinden tussen start- en eindpunt in een doolhof of maze.
+
+We beschrijven eerst het framework van de robot maze solver. Daarna volgen
+de details van de opgave.
+
+Er zijn als voorbeeld 4 mazes opgegeven in de mazes directory
+maar je kan zelf ook andere mazes aanmaken.  De dimensies van de
+maze zijn niet vast maar je moet ze wel aanduiden in het bestand,
+eerst het aantal rijen, dan het aantal kolommen (zie maze1.data en
+maze2.data, ...).
+
+Betekenis van verschillende velden:
+_ : de vloer
+# : Aanduiding van bocht/kruising
+* : weg/lijn die de robot moet volgen
+S : Startpunt
+E : Eindpunt
+
+Als voorbeeld is er een simpele random walk robot geimplementeerd.
+Je kan dit op de command prompt (bash of ... ) uittesten alsvolgt: 
+  ./compile.sh
+  ./run.sh
+
+Er worden dan 4 solution files aangemaakt: maze1.data.solution,
+maze2.data.solution, ...  Deze solution files zullen uiteindelijk
+gebruikt worden om een echte Mindstorms RCX robot te laten rijden
+door een doolhof.  In een dergelijke solution file staat gewoon
+een opeenvolging van forward, left en right. Je kan zo'n file ook
+gebruiken met de readIn member van de Robot class.
+
+Voor debugging van je algorithme kan je ook de gui gebruiken om de robot in
+actie te zien. Dit gebeurt door de optie -g mee te geven zoals in rungui.sh werd
+gedaan.
+
+De implementatie van een random walk algoritme en het gebruik
+van de classes kan je geillustreerd zien in de bestanden solve/Main.java en
+solve/RandomSolver.java. 
+Merk vooral op dat de getLight() member van lib/Robot.java een meting is
+van de cell juist voor je robot.  Ook zal de getLight() member een
+interne teller bijhouden die telkens verhoogd wordt als men een
+kruispunt meet.  De robot heeft 4 mogelijke orientaties: north,
+south, east, west. Wanneer de Robot constructor met een Maze
+instantie gebruikt wordt, zal deze automatisch op de startcel 'S'
+staan en in de correcte richting om aan het zoeken in het doolhof
+te beginnen.
+
+De Robot class houdt de afgelegde afstand bij en het aantal bochten
+dat je hebt genomen tijdens uitvoering van je algoritme.
+
+De opgave bestaat uit drie delen.
+
+1. Implementeer het A* offline zoekalgoritme om het korste pad te bepalen
+tussen start- en eindpunt in de maze. Tijdens de uitvoering van
+dit zoekalgoritme mag je de setPos member gebruiken van de Robot
+class. Hiermee kan de robot zich naar een andere node in de maze
+verplaatsen, zonder Forward, Left, Right acties.
+
+Nadat je offline searchRobot het kortste pad gevonden heeft,
+maak je een tweede Robot instantie driveRobot aan en laat je
+deze effectief het gevonden pad rijden. Nu kan je met de output
+operator (toString member van lib/Robot.java) onmiddellijk zien wat de 
+afgelegde weg is (turns, distance enz.). In het voorbeeld (random walk) is 
+het gevonden pad voor de offlineRobot identiek aan dat van de searchRobot, wat niet de bedoeling 
+is voor het offline zoekalgoritme.
+
+2. Implementeer het online learning real-time A* (LRTA*) zoekalgoritme.
+
+In de implementatie van het online zoekalgoritme is het gebruik van
+de setPos memberfunctie uiteraard uitgesloten, ook voor backtracking.
+
+3. In het artikel "Learning in real-time search: a unifying framework"
+staan verschillende variaties op het LRTA* algoritme. Dit artikel is te
+vinden op http://www.win.ua.ac.be/~wschrep/mindstorms/jair-bulitko.pdf
+
+Selecteer en implementeer een van deze variaties.
+
+Bereken voor de online algoritmes in (2) en (3)  en voor verschillende
+mazes (onder andere voor de mazes die binnenkort op
+http://www.win.ua.ac.be/~wschrep/mindstorms/mazes/ beschikbaar zullen zijn alsook
+de 4 mazes die reeds in de maze dir staan in de opgave archive) 
+
+(a) het aantal states in de zoekruimte
+(b) de lengte van het meest optimale pad
+(c) de competitive ratio 
+(d) het aantal trials in de convergence run 
+(e) de lengte van het pad door de robot afgelegd in elke trial 
+
+en bespreek je resultaten.
+
+De grootheden in (d) en (e) zijn beschreven in het
+artikel "Learning in real-time search: a unifying framework"
+(Definitie 3.3).
+
+
+Het is de bedoeling dat de classes Maze, Robot, Pos enz. behouden worden.
+Je mag zelf extra classes schrijven voor de implementatie van de
+verschillende zoekalgoritmes.
+
+
+TIP: Gebruik zo weinig mogelijk de getLight functie (de enige
+toegelaten manier om cellen in je Maze te verkennen). Hou een
+teller bij telkens je op een kruispunt komt om ervoor te zorgen dat
+je niet 2 keer op hetzelfde kruispunt de getLight functie oproept.
+Zorg met andere woorden dat je algoritme aan loop detectie
+doet en keuzes op kruispunten bijhoudt. 
+
+Succes! 
+
